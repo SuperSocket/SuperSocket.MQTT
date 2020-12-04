@@ -4,15 +4,17 @@ using System.Text;
 using SuperSocket.ProtoBase;
 using SuperSocket.Command;
 using System.Threading.Tasks;
+using System;
 
 namespace SuperSocket.MQTT.Packets
 {
     [Command(Key = ControlPacketType.CONNECT)]
     public class CONNECT : IAsyncCommand<MQTTPacket>
     {
-        public ValueTask ExecuteAsync(IAppSession session, MQTTPacket package)
+        public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package)
         {
-            throw new System.NotImplementedException();
+            var ConnectPacket = package as ConnectPacket;
+            await session.SendAsync(new byte[] { 32, 2, 0, 0 });
         }
     }
 }

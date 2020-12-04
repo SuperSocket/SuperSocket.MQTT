@@ -27,7 +27,7 @@ namespace SuperSocket.MQTT
             _packetFactories[(int)packetType] = new DefaultPacketFactory<TPacket>();
         }
 
-        public MQTTPacket Decode(ReadOnlySequence<byte> buffer, object context)
+        public MQTTPacket Decode(ref ReadOnlySequence<byte> buffer, object context)
         {
             var reader = new SequenceReader<byte>(buffer);
 
@@ -49,8 +49,8 @@ namespace SuperSocket.MQTT
                 if (!reader.TryRead(out byte lenByte))
                     break;
 
-                lenSize =+ 1;
-                
+                lenSize = +1;
+
                 if ((lenByte & 0x80) != 0x80)
                     break;
 
