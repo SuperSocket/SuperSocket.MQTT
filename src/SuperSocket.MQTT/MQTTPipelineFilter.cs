@@ -39,7 +39,7 @@ namespace SuperSocket.MQTT
                     else
                     {
                         var hasNext = (b & 0x80) == 0x80;
-                        _totalSize += (b - 0x80) * _currentLenUnit;
+                        _totalSize += (b & (0x80-1)) * _currentLenUnit;
 
                         if (!hasNext || _headerParsed >= 4)
                         {
@@ -48,7 +48,7 @@ namespace SuperSocket.MQTT
                         }
                         else
                         {
-                            _currentLenUnit *= 256;
+                            _currentLenUnit *= 0x80;
                         }
                     }
                 }
