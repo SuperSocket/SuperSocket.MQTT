@@ -4,7 +4,7 @@ using SuperSocket.ProtoBase;
 
 namespace SuperSocket.MQTT.Packets
 {
-    public class PubAckPacket : MQTTPacket
+    public class PubCompPacket : MQTTPacket
     {
         public ReadOnlyMemory<byte> PacketData { get; set; }
         public override int EncodeBody(IBufferWriter<byte> writer)

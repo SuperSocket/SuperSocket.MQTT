@@ -30,7 +30,7 @@ namespace SuperSocket.MQTT.Packets
         internal protected override void DecodeBody(ref SequenceReader<byte> reader, object context)
         {
             reader.TryReadBigEndian(out short protocolNameLen);
-            ProtocolName = reader.ReadString(protocolNameLen, Encoding.ASCII);
+            ProtocolName = reader.ReadString(protocolNameLen, Encoding.UTF8);
 
             reader.TryRead(out byte protocolLevel);
             ProtocolLevel = protocolLevel;
