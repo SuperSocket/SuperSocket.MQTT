@@ -1,5 +1,4 @@
 using System.Buffers;
-using System.Linq;
 using System.Text;
 using SuperSocket.ProtoBase;
 
@@ -30,8 +29,6 @@ namespace SuperSocket.MQTT.Packets
 
         internal protected override void DecodeBody(ref SequenceReader<byte> reader, object context)
         {
-            var Hex = string.Join(" ", reader.CurrentSpan.ToArray().Select(x => x.ToString("X2")));
-            var str = string.Join(" ", reader.CurrentSpan.ToArray().Select(x => x.ToString()));
             reader.TryReadBigEndian(out short protocolNameLen);
             ProtocolName = reader.ReadString(protocolNameLen, Encoding.ASCII);
 
@@ -43,8 +40,7 @@ namespace SuperSocket.MQTT.Packets
 
             reader.TryReadBigEndian(out short keepAlive);
             KeepAlive = keepAlive;
-            if (ProtocolLevel == 5)
-                reader.TryRead(out byte a);
+
             ClientId = reader.ReadLengthEncodedString();
 
             var connectFlags = (ConnectFlags)Flags;

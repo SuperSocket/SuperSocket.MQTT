@@ -12,7 +12,7 @@ namespace SuperSocket.MQTT
 
             if (length == 0)
                 return string.Empty;
-                
+
             return reader.ReadString(length, Encoding.UTF8);
         }
 

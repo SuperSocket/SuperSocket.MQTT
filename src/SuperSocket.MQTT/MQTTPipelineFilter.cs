@@ -1,7 +1,7 @@
 using System;
 using System.Buffers;
 using SuperSocket.ProtoBase;
-using System.Linq;
+
 namespace SuperSocket.MQTT
 {
     public class MQTTPipelineFilter : IPipelineFilter<MQTTPacket>
@@ -20,10 +20,6 @@ namespace SuperSocket.MQTT
 
         public MQTTPacket Filter(ref SequenceReader<byte> reader)
         {
-            var Hex = string.Join(" ", reader.Sequence.ToArray().Select(x => x.ToString("X2")));
-            var str = string.Join(" ", reader.Sequence.ToArray().Select(x => x.ToString()));
-            Console.WriteLine($"HEX:{Hex}");
-            Console.WriteLine($"Str:{str}");
             if (_currentLenUnit >= 0)
             {
                 if (_headerParsed > 0)
@@ -43,7 +39,7 @@ namespace SuperSocket.MQTT
                     else
                     {
                         var hasNext = (b & 0x80) == 0x80;
-                        _totalSize += (b & (0x80-1)) * _currentLenUnit;
+                        _totalSize += (b - 0x80) * _currentLenUnit;
 
                         if (!hasNext || _headerParsed >= 4)
                         {
@@ -52,11 +48,13 @@ namespace SuperSocket.MQTT
                         }
                         else
                         {
-                            _currentLenUnit *= 128;
+                            _currentLenUnit *= 256;
                         }
                     }
                 }
+
                 reader.Rewind(_headerParsed);
+
                 // has not loaded the length yet
                 if (_currentLenUnit >= 0)
                 {
@@ -72,13 +70,12 @@ namespace SuperSocket.MQTT
 
             try
             {
-                var buffer = reader.Sequence.Slice(0, _totalSize);
-                return Decoder.Decode(ref buffer, Context);
+                return Decoder.Decode(reader.Sequence.Slice(0, _totalSize), Context);
             }
             finally
             {
                 reader.Advance(_totalSize);
-            }            
+            }
         }
 
         public void Reset()

@@ -12,7 +12,7 @@ namespace SuperSocket.MQTT.Packets
 
         internal protected override void DecodeBody(ref SequenceReader<byte> reader, object context)
         {
-            
+
         }
     }
 }
