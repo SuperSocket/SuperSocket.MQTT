@@ -40,7 +40,8 @@ namespace SuperSocket.MQTT.Packets
 
             reader.TryReadBigEndian(out short keepAlive);
             KeepAlive = keepAlive;
-
+            if (ProtocolLevel == 5)
+                reader.TryRead(out byte keep);
             ClientId = reader.ReadLengthEncodedString();
 
             var connectFlags = (ConnectFlags)Flags;
