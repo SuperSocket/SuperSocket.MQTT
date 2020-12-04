@@ -27,7 +27,7 @@ namespace SuperSocket.MQTT
             _packetFactories[(int)packetType] = new DefaultPacketFactory<TPacket>();
         }
 
-        public MQTTPacket Decode(ReadOnlySequence<byte> buffer, object context)
+        public MQTTPacket Decode(ref ReadOnlySequence<byte> buffer, object context)
         {
             var reader = new SequenceReader<byte>(buffer);
 

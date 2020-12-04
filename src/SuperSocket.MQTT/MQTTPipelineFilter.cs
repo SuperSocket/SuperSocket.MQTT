@@ -70,7 +70,8 @@ namespace SuperSocket.MQTT
 
             try
             {
-                return Decoder.Decode(reader.Sequence.Slice(0, _totalSize), Context);
+                var buffer = reader.Sequence.Slice(0, _totalSize);
+                return Decoder.Decode(ref buffer, Context);
             }
             finally
             {
