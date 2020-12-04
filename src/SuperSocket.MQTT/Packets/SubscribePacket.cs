@@ -6,9 +6,6 @@ using System.Text;
 
 namespace SuperSocket.MQTT.Packets
 {
-    /// <summary>
-    /// 订阅
-    /// </summary>
     public class SubscribePacket : MQTTPacket
     {
         public string TopicName { get; set; }
@@ -17,16 +14,10 @@ namespace SuperSocket.MQTT.Packets
         public SubscribePacket()
         {
         }
-        /// <summary>
-        /// 编码
-        /// </summary>
         public override int EncodeBody(IBufferWriter<byte> writer)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// 解码
-        /// </summary>
         protected internal override void DecodeBody(ref SequenceReader<byte> reader, object context)
         {
             reader.TryReadBigEndian(out short packetIdentifier);
