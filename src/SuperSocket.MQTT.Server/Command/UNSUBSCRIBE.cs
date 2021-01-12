@@ -1,22 +1,36 @@
-﻿using SuperSocket.Command;
+﻿
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using System.Linq;
+using System.Buffers;
+using SuperSocket.Command;
 
 namespace SuperSocket.MQTT.Packets
 {
     [Command(Key = ControlPacketType.UNSUBSCRIBE)]
     public class UNSUBSCRIBE : IAsyncCommand<MQTTPacket>
     {
+        private ArrayPool<byte> _memoryPool = ArrayPool<byte>.Shared;
+        
         public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package)
         {
-            var Session = session as MQTTSession;
-            var UnsubscribePacket = package as UnsubscribePacket;
-            var buff = new byte[] { 176, 2, 0, 02 };
-            buff[3] = UnsubscribePacket.PacketIdentifier;
-            await session.SendAsync(buff);
+            var pqttSession = session as MQTTSession;
+            var unsubscribePacket = package as UnsubscribePacket;
+
+            var buffer = _memoryPool.Rent(4);
+            
+            buffer[0] = 176;
+            buffer[1] = 2;
+            buffer[2] = unsubscribePacket.PacketIdentifier;
+            buffer[3] = 2;
+
+            try
+            {
+                await session.SendAsync(buffer);
+            }
+            finally
+            {
+                _memoryPool.Return(buffer);
+            }            
         }
     }
 }

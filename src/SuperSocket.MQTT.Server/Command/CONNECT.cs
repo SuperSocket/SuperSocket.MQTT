@@ -11,10 +11,12 @@ namespace SuperSocket.MQTT.Packets
     [Command(Key = ControlPacketType.CONNECT)]
     public class CONNECT : IAsyncCommand<MQTTPacket>
     {
+        private static readonly byte[] _connectData = new byte[] { 32, 2, 0, 0 };
+        
         public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package)
         {
-            var ConnectPacket = package as ConnectPacket;
-            await session.SendAsync(new byte[] { 32, 2, 0, 0 });
+            var connectPacket = package as ConnectPacket;
+            await session.SendAsync(_connectData);
         }
     }
 }

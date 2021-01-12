@@ -12,8 +12,8 @@ namespace SuperSocket.MQTT.Packets
     {
         public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package)
         {
-            var PubCompPacket = package as PubCompPacket;
-           await session.SendAsync(PubCompPacket.PacketData);
+            var pubCompPacket = package as PubCompPacket;
+            await session.SendAsync(pubCompPacket.PacketData);
         }
     }
 }
