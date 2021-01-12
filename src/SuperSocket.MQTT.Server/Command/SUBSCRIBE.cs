@@ -1,13 +1,11 @@
-﻿using SuperSocket.Command;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 using System.Threading.Tasks;
-using System.Linq;
 using System.Buffers;
 using System.Buffers.Binary;
+using SuperSocket.MQTT.Packets;
+using SuperSocket.Command;
 
-namespace SuperSocket.MQTT.Packets
+namespace SuperSocket.MQTT.Server.Command
 {
     [Command(Key = ControlPacketType.SUBSCRIBE)]
     public class SUBSCRIBE : IAsyncCommand<MQTTPacket>

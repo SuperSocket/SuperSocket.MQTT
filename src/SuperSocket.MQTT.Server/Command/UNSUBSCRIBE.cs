@@ -3,8 +3,9 @@ using System;
 using System.Threading.Tasks;
 using System.Buffers;
 using SuperSocket.Command;
+using SuperSocket.MQTT.Packets;
 
-namespace SuperSocket.MQTT.Packets
+namespace SuperSocket.MQTT.Server.Command
 {
     [Command(Key = ControlPacketType.UNSUBSCRIBE)]
     public class UNSUBSCRIBE : IAsyncCommand<MQTTPacket>
@@ -17,7 +18,7 @@ namespace SuperSocket.MQTT.Packets
             var unsubscribePacket = package as UnsubscribePacket;
 
             var buffer = _memoryPool.Rent(4);
-            
+
             buffer[0] = 176;
             buffer[1] = 2;
             buffer[2] = unsubscribePacket.PacketIdentifier;

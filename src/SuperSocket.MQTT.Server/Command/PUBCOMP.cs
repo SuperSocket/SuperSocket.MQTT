@@ -1,11 +1,9 @@
-﻿using SuperSocket.Command;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using SuperSocket.Command;
+using SuperSocket.MQTT.Packets;
 
-namespace SuperSocket.MQTT.Packets
+
+namespace SuperSocket.MQTT.Server.Command
 {
     [Command(Key = ControlPacketType.PUBCOMP)]
     public class PUBCOMP : IAsyncCommand<MQTTPacket>

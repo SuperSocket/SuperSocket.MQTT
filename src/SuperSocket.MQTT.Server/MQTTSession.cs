@@ -1,11 +1,10 @@
-﻿using SuperSocket.MQTT.Packets;
-using SuperSocket.Server;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
+using SuperSocket.MQTT.Packets;
+using SuperSocket.Server;
 
-namespace SuperSocket.MQTT
+namespace SuperSocket.MQTT.Server
 {
     public class MQTTSession : AppSession
     {

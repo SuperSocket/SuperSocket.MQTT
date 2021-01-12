@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SuperSocket.MQTT.Packets
+namespace SuperSocket.MQTT.Server.Command
 {
     [Command(Key = ControlPacketType.PINGREQ)]
     public class PINGREQ : IAsyncCommand<MQTTPacket>
