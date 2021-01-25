@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.Buffers;
 using System.Buffers.Binary;
@@ -19,26 +19,11 @@ namespace SuperSocket.MQTT.Server.Command
 
             mqttSession.TopicNames.Add(subpacket);
 
-            var buffer = _memoryPool.Rent(5);
+            byte[] numberBytes = BitConverter.GetBytes(subpacket.PacketIdentifier);
+
+            byte[] data = new byte[] { 144, 3, numberBytes[1], numberBytes[0], (byte)subpacket.Qos };
             
-            WriteBuffer(buffer, subpacket);
-
-            try
-            {
-                await session.SendAsync(buffer);
-            }
-            finally
-            {
-                _memoryPool.Return(buffer);
-            }
-        }
-
-        private void WriteBuffer(byte[] buffer, SubscribePacket packet)
-        {
-            buffer[0] = 144;
-            buffer[1] = 3;
-
-            BinaryPrimitives.WriteInt16BigEndian(buffer.AsSpan().Slice(2), packet.PacketIdentifier);
+            await session.SendAsync(data);
         }
     }
 }
