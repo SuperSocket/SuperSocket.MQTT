@@ -5,6 +5,7 @@ using System.Buffers.Binary;
 using SuperSocket.MQTT.Packets;
 using SuperSocket.Command;
 
+
 namespace SuperSocket.MQTT.Server.Command
 {
     [Command(Key = ControlPacketType.SUBSCRIBE)]
@@ -13,19 +14,19 @@ namespace SuperSocket.MQTT.Server.Command
         private ArrayPool<byte> _memoryPool = ArrayPool<byte>.Shared;
 
         public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package)
-        {           
+        {
             var mqttSession = session as MQTTSession;
             var subpacket = package as SubscribePacket;
 
             mqttSession.TopicNames.Add(subpacket);
 
             var buffer = _memoryPool.Rent(5);
-            
+
             WriteBuffer(buffer, subpacket);
 
             try
             {
-                await session.SendAsync(buffer);
+                await session.SendAsync(buffer.AsMemory()[..5]);
             }
             finally
             {
@@ -39,6 +40,8 @@ namespace SuperSocket.MQTT.Server.Command
             buffer[1] = 3;
 
             BinaryPrimitives.WriteInt16BigEndian(buffer.AsSpan().Slice(2), packet.PacketIdentifier);
+
+            buffer[4] = (byte)packet.Qos;
         }
     }
 }
