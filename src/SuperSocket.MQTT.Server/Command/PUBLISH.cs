@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using SuperSocket.Command;
 using SuperSocket.MQTT.Packets;
+using SuperSocket.Server.Abstractions.Session;
 
 namespace SuperSocket.MQTT.Server.Command
 {
@@ -16,11 +18,13 @@ namespace SuperSocket.MQTT.Server.Command
         {
             this.sessionContainer = sessionContainer;
         }
-        public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package)
+        public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package, CancellationToken cancellationToken)
         {
             var pubpacket = package as PublishPacket;
             var sessions = sessionContainer.GetSessions<MQTTSession>();
+
             var b = sessions.Where(x => x.TopicNames.Any(x => IsMatch(pubpacket.TopicName,x.TopicName)));
+            
             await Task.Run(() =>
             {
                 foreach (var item in b)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using SuperSocket.MQTT.Packets;
 using SuperSocket.Server;
+using SuperSocket.Server.Abstractions.Session;
 
 namespace SuperSocket.MQTT.Server
 {

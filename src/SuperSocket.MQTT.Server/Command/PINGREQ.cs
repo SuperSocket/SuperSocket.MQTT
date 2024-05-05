@@ -1,8 +1,9 @@
-﻿using SuperSocket.Command;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using SuperSocket.Command;
+using SuperSocket.MQTT.Packets;
+using SuperSocket.Server.Abstractions.Session;
 
 namespace SuperSocket.MQTT.Server.Command
 {
@@ -11,7 +12,7 @@ namespace SuperSocket.MQTT.Server.Command
     {
         private static readonly byte[] _pingData = new byte[] { 208, 0 };
 
-        public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package)
+        public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package, CancellationToken cancellationToken)
         {
             await session.SendAsync(_pingData);
         }

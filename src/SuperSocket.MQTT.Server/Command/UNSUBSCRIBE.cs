@@ -1,9 +1,10 @@
-﻿
-using System;
-using System.Threading.Tasks;
+﻿using System;
 using System.Buffers;
+using System.Threading;
+using System.Threading.Tasks;
 using SuperSocket.Command;
 using SuperSocket.MQTT.Packets;
+using SuperSocket.Server.Abstractions.Session;
 
 namespace SuperSocket.MQTT.Server.Command
 {
@@ -12,7 +13,7 @@ namespace SuperSocket.MQTT.Server.Command
     {
         private ArrayPool<byte> _memoryPool = ArrayPool<byte>.Shared;
         
-        public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package)
+        public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package, CancellationToken cancellationToken)
         {
             var pqttSession = session as MQTTSession;
             var unsubscribePacket = package as UnsubscribePacket;
