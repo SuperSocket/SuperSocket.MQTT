@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSocket.MQTT", "src\Sup
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperSocket.MQTT.Server", "src\SuperSocket.MQTT.Server\SuperSocket.MQTT.Server.csproj", "{B28F3060-D93F-4ED4-A24C-B9C1D4C7ED09}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{0C88DD14-F956-CE84-757C-A364CCF449FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,9 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{549EA105-D941-4923-85B8-FA777444A1A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -46,6 +45,9 @@ Global
 		{B28F3060-D93F-4ED4-A24C-B9C1D4C7ED09}.Release|x64.Build.0 = Release|Any CPU
 		{B28F3060-D93F-4ED4-A24C-B9C1D4C7ED09}.Release|x86.ActiveCfg = Release|Any CPU
 		{B28F3060-D93F-4ED4-A24C-B9C1D4C7ED09}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{549EA105-D941-4923-85B8-FA777444A1A9} = {44759F26-AD7B-4D06-BBCF-C70D5AB2C4BE}

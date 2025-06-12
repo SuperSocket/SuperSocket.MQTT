@@ -23,13 +23,14 @@ namespace SuperSocket.MQTT.Server.Command
             var pubpacket = package as PublishPacket;
             var sessions = sessionContainer.GetSessions<MQTTSession>();
 
-            var b = sessions.Where(x => x.TopicNames.Any(x => IsMatch(pubpacket.TopicName,x.TopicName)));
+            var b = sessions.Where(x => x.TopicNames.Any(subscription => 
+                subscription.TopicFilters.Any(filter => IsMatch(pubpacket.TopicName, filter.Topic))));
             
             await Task.Run(() =>
             {
                 foreach (var item in b)
                 {
-                    item.SendAsync(pubpacket.TopicData);
+                    item.SendAsync(pubpacket.Payload);
                 }
             });
         }

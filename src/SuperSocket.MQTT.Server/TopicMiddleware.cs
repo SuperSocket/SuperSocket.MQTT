@@ -47,9 +47,12 @@ namespace SuperSocket.MQTT.Server
 
             foreach (var topic in topics)
             {
-                if (_topics.TryGetValue(topic.TopicName, out var subscribedSessions))
+                foreach (var topicFilter in topic.TopicFilters)
                 {
-                    subscribedSessions.Remove(session.SessionID, out _);
+                    if (_topics.TryGetValue(topicFilter.Topic, out var subscribedSessions))
+                    {
+                        subscribedSessions.Remove(session.SessionID, out _);
+                    }
                 }
             }
 

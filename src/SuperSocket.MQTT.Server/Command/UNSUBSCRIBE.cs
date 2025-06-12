@@ -25,18 +25,22 @@ namespace SuperSocket.MQTT.Server.Command
             var mqttSession = session as MQTTSession;
             var unsubscribePacket = package as UnsubscribePacket;
 
-            _topicManager.UnsubscribeTopic(mqttSession, unsubscribePacket.TopicName);
+            // Unsubscribe from all topics in the packet
+            foreach (var topic in unsubscribePacket.TopicFilters)
+            {
+                _topicManager.UnsubscribeTopic(mqttSession, topic);
+            }
 
             var buffer = _memoryPool.Rent(4);
 
             buffer[0] = 176;
             buffer[1] = 2;
-            buffer[2] = unsubscribePacket.PacketIdentifier;
-            buffer[3] = 2;
+            buffer[2] = (byte)(unsubscribePacket.PacketIdentifier >> 8);
+            buffer[3] = (byte)(unsubscribePacket.PacketIdentifier & 0xFF);
 
             try
             {
-                await session.SendAsync(buffer);
+                await session.SendAsync(buffer.AsMemory()[..4]);
             }
             finally
             {

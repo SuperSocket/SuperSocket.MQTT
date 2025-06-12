@@ -10,11 +10,12 @@ namespace SuperSocket.MQTT.Server.Command
     [Command(Key = ControlPacketType.PINGREQ)]
     public class PINGREQ : IAsyncCommand<MQTTPacket>
     {
-        private static readonly byte[] _pingData = new byte[] { 208, 0 };
+        private static readonly byte[] _pingRespData = new byte[] { 0xD0, 0x00 }; // PINGRESP packet
 
         public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package, CancellationToken cancellationToken)
         {
-            await session.SendAsync(_pingData);
+            // Send PINGRESP
+            await session.SendAsync(_pingRespData);
         }
     }
 }

@@ -10,16 +10,19 @@ namespace SuperSocket.MQTT
         {
             _packetFactories = new IPacketFactory[20];
             RegisterPacketType<ConnectPacket>(ControlPacketType.CONNECT);
-            RegisterPacketType<PingReqPacket>(ControlPacketType.PINGREQ);
-            RegisterPacketType<DisconnectPacket>(ControlPacketType.DISCONNECT);
+            RegisterPacketType<ConnAckPacket>(ControlPacketType.CONNACK);
             RegisterPacketType<PublishPacket>(ControlPacketType.PUBLISH);
             RegisterPacketType<PubAckPacket>(ControlPacketType.PUBACK);
             RegisterPacketType<PubRecPacket>(ControlPacketType.PUBREC);
             RegisterPacketType<PubRelPacket>(ControlPacketType.PUBREL);
             RegisterPacketType<PubCompPacket>(ControlPacketType.PUBCOMP);
             RegisterPacketType<SubscribePacket>(ControlPacketType.SUBSCRIBE);
+            RegisterPacketType<SubAckPacket>(ControlPacketType.SUBACK);
             RegisterPacketType<UnsubscribePacket>(ControlPacketType.UNSUBSCRIBE);
-
+            RegisterPacketType<UnsubAckPacket>(ControlPacketType.UNSUBACK);
+            RegisterPacketType<PingReqPacket>(ControlPacketType.PINGREQ);
+            RegisterPacketType<PingRespPacket>(ControlPacketType.PINGRESP);
+            RegisterPacketType<DisconnectPacket>(ControlPacketType.DISCONNECT);
         }
         interface IPacketFactory
         {
