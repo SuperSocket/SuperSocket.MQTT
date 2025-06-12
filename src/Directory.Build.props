@@ -1,8 +1,7 @@
 <Project>
   <PropertyGroup>
-    <LangVersion>8.0</LangVersion>    
-    <TargetFrameworks>net6.0;net7.0;net8.0;netstandard2.1</TargetFrameworks>
-    <SuperSocketVersion>2.0.0-beta.21</SuperSocketVersion>
+    <LangVersion>12.0</LangVersion>    
+    <TargetFrameworks>net6.0;net7.0;net8.0;net9.0;</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup>    
     <PackageProjectUrl>https://github.com/SuperSocket/SuperSocket.MQTT</PackageProjectUrl>
@@ -13,6 +12,6 @@
     <Authors>SuperSocket Developer Community</Authors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 </Project>

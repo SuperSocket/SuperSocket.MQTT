@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- SuperSocket packages -->
+    <PackageVersion Include="SuperSocket.ProtoBase" Version="2.0.1" />
+    <PackageVersion Include="SuperSocket.Server" Version="2.0.1" />
+    <PackageVersion Include="SuperSocket.Command" Version="2.0.1" />
+    <!-- Build and development tools -->
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />
+    <!-- Test packages -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageVersion Include="xunit" Version="2.4.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.0" />
+    <PackageVersion Include="Moq" Version="4.18.4" />
+  </ItemGroup>
+</Project>

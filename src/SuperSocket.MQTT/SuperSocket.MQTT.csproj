@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="SuperSocket.ProtoBase" Version="$(SuperSocketVersion)" />
+    <PackageReference Include="SuperSocket.ProtoBase" />
   </ItemGroup>
 </Project>

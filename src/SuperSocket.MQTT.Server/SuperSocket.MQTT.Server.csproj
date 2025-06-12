@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="../SuperSocket.MQTT/SuperSocket.MQTT.csproj" />
-    <PackageReference Include="SuperSocket.Server" Version="$(SuperSocketVersion)" />
-    <PackageReference Include="SuperSocket.Command" Version="$(SuperSocketVersion)" />
+    <PackageReference Include="SuperSocket.Server" />
+    <PackageReference Include="SuperSocket.Command" />
   </ItemGroup>
 </Project>
