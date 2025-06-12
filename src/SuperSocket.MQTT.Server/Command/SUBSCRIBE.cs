@@ -14,12 +14,21 @@ namespace SuperSocket.MQTT.Server.Command
     {
         private ArrayPool<byte> _memoryPool = ArrayPool<byte>.Shared;
 
+        private readonly ITopicManager _topicManager;
+
+        public SUBSCRIBE(ITopicManager topicManager)
+        {
+            _topicManager = topicManager;
+        }
+
         public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package, CancellationToken cancellationToken)
         {
             var mqttSession = session as MQTTSession;
             var subpacket = package as SubscribePacket;
 
             mqttSession.TopicNames.Add(subpacket);
+
+            _topicManager.SubscribeTopic(mqttSession, subpacket.TopicName);
 
             var buffer = _memoryPool.Rent(5);
 

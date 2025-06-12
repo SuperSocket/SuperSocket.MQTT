@@ -12,11 +12,20 @@ namespace SuperSocket.MQTT.Server.Command
     public class UNSUBSCRIBE : IAsyncCommand<MQTTPacket>
     {
         private ArrayPool<byte> _memoryPool = ArrayPool<byte>.Shared;
-        
+
+        private readonly ITopicManager _topicManager;
+
+        public UNSUBSCRIBE(ITopicManager topicManager)
+        {
+            _topicManager = topicManager;
+        }
+
         public async ValueTask ExecuteAsync(IAppSession session, MQTTPacket package, CancellationToken cancellationToken)
         {
-            var pqttSession = session as MQTTSession;
+            var mqttSession = session as MQTTSession;
             var unsubscribePacket = package as UnsubscribePacket;
+
+            _topicManager.UnsubscribeTopic(mqttSession, unsubscribePacket.TopicName);
 
             var buffer = _memoryPool.Rent(4);
 

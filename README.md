@@ -1,7 +1,7 @@
 # SuperSocket.MQTT
 
 [![Join the chat at https://gitter.im/supersocket/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/supersocket/community)
-[![Build Status](https://travis-ci.org/supersocket/SuperSocket.MQTT.svg?branch=master)](https://travis-ci.org/supersocket/SuperSocket.MQTT)
+[![build](https://github.com/SuperSocket/SuperSocket.MQTT/actions/workflows/build.yml/badge.svg)](https://github.com/SuperSocket/SuperSocket.MQTT/actions/workflows/build.yml)
 
 MQTT protocol implementation base on SuperSocket
 
