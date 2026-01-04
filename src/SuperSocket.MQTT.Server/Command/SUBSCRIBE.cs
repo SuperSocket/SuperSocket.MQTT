@@ -26,7 +26,7 @@ namespace SuperSocket.MQTT.Server.Command
             var mqttSession = session as MQTTSession;
             var subpacket = package as SubscribePacket;
 
-            mqttSession.TopicNames.Add(subpacket);
+            mqttSession.Topics.AddRange(subpacket.TopicFilters);
 
             // Subscribe to all topics in the packet
             foreach (var topicFilter in subpacket.TopicFilters)
@@ -46,10 +46,13 @@ namespace SuperSocket.MQTT.Server.Command
             {
                 _memoryPool.Return(buffer);
             }
-        }        private void WriteBuffer(byte[] buffer, SubscribePacket packet)
+        }
+        
+        private void WriteBuffer(byte[] buffer, SubscribePacket packet)
         {
             buffer[0] = 144;
             buffer[1] = 3;
+
             BinaryPrimitives.WriteUInt16BigEndian(buffer.AsSpan().Slice(2), packet.PacketIdentifier);
 
             // Use the first topic filter's QoS, or default to 0

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using SuperSocket.Command;
@@ -25,6 +26,29 @@ namespace SuperSocket.MQTT.Server.Command
             var mqttSession = session as MQTTSession;
             var unsubscribePacket = package as UnsubscribePacket;
 
+            var newTopics = new List<TopicFilter>();
+
+            foreach (var topic in mqttSession.Topics)
+            {
+                var unsubscribed = false;
+
+                foreach (var unsubTopic in unsubscribePacket.TopicFilters)
+                {
+                    if (topic.Topic.Equals(unsubTopic, StringComparison.OrdinalIgnoreCase))
+                    {
+                        unsubscribed = true;
+                        break;
+                    }
+                }
+
+                if (!unsubscribed)
+                {
+                    newTopics.Add(topic);
+                }
+            }
+
+            mqttSession.Topics = newTopics;
+            
             // Unsubscribe from all topics in the packet
             foreach (var topic in unsubscribePacket.TopicFilters)
             {

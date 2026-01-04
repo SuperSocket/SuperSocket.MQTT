@@ -10,6 +10,15 @@ namespace SuperSocket.MQTT.Packets
     {
         public string Topic { get; set; }
         public byte QoS { get; set; }
+
+        private Lazy<IReadOnlyList<string>> _topicSegmentsLazy;
+
+        public IReadOnlyList<string> TopicSegments => _topicSegmentsLazy.Value;
+
+        public TopicFilter()
+        {
+            _topicSegmentsLazy = new Lazy<IReadOnlyList<string>>(() => string.IsNullOrEmpty(this.Topic) ? Array.Empty<string>() : this.Topic.Split(MQTTConst.TopicLevelSeparator, StringSplitOptions.RemoveEmptyEntries));
+        }
     }
 
     public class SubscribePacket : MQTTPacket

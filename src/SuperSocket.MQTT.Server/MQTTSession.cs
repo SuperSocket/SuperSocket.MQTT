@@ -9,7 +9,7 @@ namespace SuperSocket.MQTT.Server
 {
     public class MQTTSession : AppSession
     {
-        public List<SubscribePacket> TopicNames = new List<SubscribePacket>();
+        public List<TopicFilter> Topics = new List<TopicFilter>();
 
         public ValueTask SendAsync(ReadOnlyMemory<byte> data)
         {
