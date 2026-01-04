@@ -17,7 +17,12 @@ namespace SuperSocket.MQTT.Packets
 
         public TopicFilter()
         {
-            _topicSegmentsLazy = new Lazy<IReadOnlyList<string>>(() => string.IsNullOrEmpty(this.Topic) ? Array.Empty<string>() : this.Topic.Split(MQTTConst.TopicLevelSeparator, StringSplitOptions.RemoveEmptyEntries));
+            _topicSegmentsLazy = new Lazy<IReadOnlyList<string>>(GetTopicSegments);
+        }
+
+        private IReadOnlyList<string> GetTopicSegments()
+        {
+            return string.IsNullOrEmpty(this.Topic) ? Array.Empty<string>() : this.Topic.Split(MQTTConst.TopicLevelSeparator, StringSplitOptions.RemoveEmptyEntries);
         }
     }
 
