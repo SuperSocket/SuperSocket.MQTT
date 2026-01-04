@@ -43,16 +43,13 @@ namespace SuperSocket.MQTT.Server
 
         public override ValueTask<bool> UnRegisterSession(IAppSession session)
         {
-            var topics = (session as MQTTSession).TopicNames;            
+            var topics = (session as MQTTSession).Topics;            
 
             foreach (var topic in topics)
             {
-                foreach (var topicFilter in topic.TopicFilters)
+                if (_topics.TryGetValue(topic.Topic, out var subscribedSessions))
                 {
-                    if (_topics.TryGetValue(topicFilter.Topic, out var subscribedSessions))
-                    {
-                        subscribedSessions.Remove(session.SessionID, out _);
-                    }
+                    subscribedSessions.Remove(session.SessionID, out _);
                 }
             }
 
