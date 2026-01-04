@@ -12,8 +12,10 @@ using SuperSocket.MQTT.Server.Command;
 using SuperSocket.Server.Abstractions.Session;
 using SuperSocket.Server.Abstractions;
 using SuperSocket.Server;
+using SuperSocket.Server.Host;
 using SuperSocket.Connection;
 using Moq;
+using Microsoft.Extensions.Configuration;
 
 namespace SuperSocket.MQTT.Tests
 {
@@ -422,6 +424,50 @@ namespace SuperSocket.MQTT.Tests
             
             Assert.Equal(2, multiLevelWildcard.TopicSegments.Count);
             Assert.Equal("#", multiLevelWildcard.TopicSegments[1]);
+        }
+
+        [Fact]
+        public async Task UseMQTT_ShouldStartServerSuccessfully()
+        {
+            // Arrange
+            var host = SuperSocketHostBuilder
+                .Create<MQTTPacket>()
+                .UseMQTT()
+                .UseInProcSessionContainer()
+                .ConfigureServices((ctx, services) =>
+                {
+                    // Add any additional required services
+                })
+                .ConfigureAppConfiguration((hostCtx, configApp) =>
+                {
+                    configApp.AddInMemoryCollection(new Dictionary<string, string>
+                    {
+                        { "serverOptions:name", "MQTTTestServer" },
+                        { "serverOptions:listeners:0:ip", "Any" },
+                        { "serverOptions:listeners:0:port", "11883" }
+                    });
+                })
+                .Build();
+
+            try
+            {
+                // Act
+                await host.StartAsync();
+
+                // Assert - if we get here without exception, the server started successfully
+                Assert.True(true);
+
+                // Clean up
+                await host.StopAsync();
+            }
+            finally
+            {
+                // Ensure disposal
+                if (host is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
         }
     }
 }
