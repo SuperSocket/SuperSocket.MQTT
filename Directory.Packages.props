@@ -7,6 +7,7 @@
     <PackageVersion Include="SuperSocket.ProtoBase" Version="2.0.1" />
     <PackageVersion Include="SuperSocket.Server" Version="2.0.1" />
     <PackageVersion Include="SuperSocket.Command" Version="2.0.1" />
+    <PackageVersion Include="SuperSocket.Client" Version="2.0.1" />
     <!-- Build and development tools -->
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />
     <!-- Test packages -->

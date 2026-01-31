@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../SuperSocket.MQTT/SuperSocket.MQTT.csproj" />
+    <PackageReference Include="SuperSocket.Client" />
+  </ItemGroup>
+</Project>

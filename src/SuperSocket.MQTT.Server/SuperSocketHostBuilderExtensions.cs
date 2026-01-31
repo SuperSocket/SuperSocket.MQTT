@@ -29,12 +29,12 @@ namespace SuperSocket.MQTT.Server
         public static ISuperSocketHostBuilder<MQTTPacket> UseMQTT(this ISuperSocketHostBuilder<MQTTPacket> builder)
         {
             return builder
-                .UsePipelineFilter<MQTTPipelineFilter>()
+                .UsePipelineFilterFactory<MQTTPipelineFilterFactory>()
                 .UseSession<MQTTSession>()
                 .UseCommand<ControlPacketType, MQTTPacket>(options => 
                 {
-                    // Add all command classes from the current assembly
-                    options.AddCommandAssembly(typeof(MQTTPacket).Assembly);
+                    // Add all command classes from the Server assembly
+                    options.AddCommandAssembly(typeof(SuperSocketHostBuilderExtensions).Assembly);
                 })
                 .UseMiddleware<TopicMiddleware>(sp => sp.GetRequiredService<TopicMiddleware>())
                 .ConfigureServices((ctx, services) =>

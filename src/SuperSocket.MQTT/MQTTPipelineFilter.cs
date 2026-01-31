@@ -18,6 +18,14 @@ namespace SuperSocket.MQTT
 
         private int _headerParsed;
 
+        /// <summary>
+        /// Creates a new instance of MQTTPipelineFilter with a default MQTTPacketDecoder.
+        /// </summary>
+        public MQTTPipelineFilter()
+        {
+            Decoder = new MQTTPacketDecoder();
+        }
+
         public MQTTPacket Filter(ref SequenceReader<byte> reader)
         {
             if (_currentLenUnit >= 0)
