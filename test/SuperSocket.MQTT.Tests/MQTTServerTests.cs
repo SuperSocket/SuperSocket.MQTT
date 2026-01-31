@@ -154,7 +154,10 @@ namespace SuperSocket.MQTT.Tests
             Assert.Single(session.SentData);
             var response = session.SentData[0];
             Assert.Equal(144, response[0]); // SUBACK packet type
-            Assert.Equal(3, response[1]); // Remaining length
+            Assert.Equal(4, response[1]); // Remaining length: 2 (packet ID) + 2 (return codes for 2 topics)
+            // Verify return codes for each topic
+            Assert.Equal(0, response[4]); // QoS 0 for first topic
+            Assert.Equal(1, response[5]); // QoS 1 for second topic
         }
 
         [Fact]
@@ -330,11 +333,12 @@ namespace SuperSocket.MQTT.Tests
             // Act
             await pubrecCommand.ExecuteAsync(session, pubrecPacket, CancellationToken.None);
 
-            // Assert
+            // Assert - PUBREC should respond with PUBREL (0x62)
             Assert.Single(session.SentData);
             var response = session.SentData[0];
-            Assert.Equal(80, response[0]); // PUBREC packet type (0x50)
+            Assert.Equal(0x62, response[0]); // PUBREL packet type (0110 0010)
             Assert.Equal(2, response[1]); // Remaining length
+            Assert.Equal(456, (response[2] << 8) | response[3]); // Packet identifier
         }
 
         [Fact]
@@ -351,11 +355,12 @@ namespace SuperSocket.MQTT.Tests
             // Act
             await pubrelCommand.ExecuteAsync(session, pubrelPacket, CancellationToken.None);
 
-            // Assert
+            // Assert - PUBREL should respond with PUBCOMP (0x70)
             Assert.Single(session.SentData);
             var response = session.SentData[0];
-            Assert.Equal(96, response[0]); // PUBREL packet type (0x60)
+            Assert.Equal(0x70, response[0]); // PUBCOMP packet type
             Assert.Equal(2, response[1]); // Remaining length
+            Assert.Equal(789, (response[2] << 8) | response[3]); // Packet identifier
         }
 
         [Fact]
@@ -468,6 +473,242 @@ namespace SuperSocket.MQTT.Tests
                     disposable.Dispose();
                 }
             }
+        }
+
+        [Fact]
+        public async Task DISCONNECT_Command_ShouldCloseSession()
+        {
+            // Arrange
+            var sessionMock = new Mock<IAppSession>();
+            var disconnectCommand = new DISCONNECT();
+            var disconnectPacket = new DisconnectPacket();
+
+            // Act
+            await disconnectCommand.ExecuteAsync(sessionMock.Object, disconnectPacket, CancellationToken.None);
+
+            // Assert - Verify that CloseAsync was called to gracefully close the session
+            sessionMock.Verify(s => s.CloseAsync(CloseReason.RemoteClosing), Times.Once);
+        }
+
+        [Fact]
+        public async Task SUBSCRIBE_Command_WithSingleTopic_ShouldReturnCorrectSubAck()
+        {
+            // Arrange
+            var session = new TestMQTTSession();
+            var topicManagerMock = new Mock<ITopicManager>();
+            
+            var subscribeCommand = new SUBSCRIBE(topicManagerMock.Object);
+            var subscribePacket = new SubscribePacket
+            {
+                PacketIdentifier = 100,
+                TopicFilters = new List<TopicFilter>
+                {
+                    new TopicFilter { Topic = "sensor/data", QoS = 2 }
+                }
+            };
+
+            // Act
+            await subscribeCommand.ExecuteAsync(session, subscribePacket, CancellationToken.None);
+
+            // Assert
+            Assert.Single(session.SentData);
+            var response = session.SentData[0];
+            Assert.Equal(144, response[0]); // SUBACK packet type
+            Assert.Equal(3, response[1]); // Remaining length: 2 (packet ID) + 1 (return code)
+            Assert.Equal(0, response[2]); // Packet ID high byte
+            Assert.Equal(100, response[3]); // Packet ID low byte
+            Assert.Equal(2, response[4]); // QoS 2 for the topic
+        }
+
+        [Fact]
+        public async Task PUBLISH_Command_WithNoSubscribers_ShouldNotSendAnyMessages()
+        {
+            // Arrange
+            var subscriberSession = new TestMQTTSession();
+            subscriberSession.Topics.Add(CreateTopicFilter("different/topic"));
+            
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            var sessionContainer = new InProcSessionContainerMiddleware(serviceProviderMock.Object);
+            await sessionContainer.RegisterSession(subscriberSession);
+
+            var publishCommand = new PUBLISH(sessionContainer);
+            
+            var payload = Encoding.UTF8.GetBytes("test data");
+            var publishPacket = new PublishPacket
+            {
+                TopicName = "home/temperature",
+                Qos = 0,
+                Payload = new ReadOnlyMemory<byte>(payload)
+            };
+
+            // Act
+            await publishCommand.ExecuteAsync(subscriberSession, publishPacket, CancellationToken.None);
+
+            // Assert - No messages should be sent since no one is subscribed to "home/temperature"
+            Assert.Empty(subscriberSession.SentData);
+        }
+
+        [Fact]
+        public async Task PUBLISH_Command_WithEmptyTopic_ShouldNotSendAnyMessages()
+        {
+            // Arrange
+            var subscriberSession = new TestMQTTSession();
+            subscriberSession.Topics.Add(CreateTopicFilter("home/temperature"));
+            
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            var sessionContainer = new InProcSessionContainerMiddleware(serviceProviderMock.Object);
+            await sessionContainer.RegisterSession(subscriberSession);
+
+            var publishCommand = new PUBLISH(sessionContainer);
+            
+            var payload = Encoding.UTF8.GetBytes("test data");
+            var publishPacket = new PublishPacket
+            {
+                TopicName = "", // Empty topic
+                Qos = 0,
+                Payload = new ReadOnlyMemory<byte>(payload)
+            };
+
+            // Act
+            await publishCommand.ExecuteAsync(subscriberSession, publishPacket, CancellationToken.None);
+
+            // Assert - Should early return when topic is empty
+            Assert.Empty(subscriberSession.SentData);
+        }
+
+        [Fact]
+        public async Task PUBLISH_Command_WithMultipleSubscribers_ShouldBroadcast()
+        {
+            // Arrange
+            var session1 = new TestMQTTSession();
+            session1.Topics.Add(CreateTopicFilter("home/temperature"));
+            
+            var session2 = new TestMQTTSession();
+            session2.Topics.Add(CreateTopicFilter("home/temperature"));
+            
+            var session3 = new TestMQTTSession();
+            session3.Topics.Add(CreateTopicFilter("home/humidity")); // Different topic
+            
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            var sessionContainer = new InProcSessionContainerMiddleware(serviceProviderMock.Object);
+            await sessionContainer.RegisterSession(session1);
+            await sessionContainer.RegisterSession(session2);
+            await sessionContainer.RegisterSession(session3);
+
+            var publishCommand = new PUBLISH(sessionContainer);
+            
+            var payload = Encoding.UTF8.GetBytes("25.5");
+            var publishPacket = new PublishPacket
+            {
+                TopicName = "home/temperature",
+                Qos = 0,
+                Payload = new ReadOnlyMemory<byte>(payload)
+            };
+
+            // Act
+            await publishCommand.ExecuteAsync(session1, publishPacket, CancellationToken.None);
+
+            // Assert
+            // Both session1 and session2 should receive the message
+            Assert.Single(session1.SentData);
+            Assert.Single(session2.SentData);
+            Assert.Empty(session3.SentData); // Different topic, no message
+            
+            Assert.Equal("25.5", Encoding.UTF8.GetString(session1.SentData[0]));
+            Assert.Equal("25.5", Encoding.UTF8.GetString(session2.SentData[0]));
+        }
+
+        [Fact]
+        public void TopicMiddleware_ShouldCleanupOnSessionUnregister()
+        {
+            // Arrange
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            var middleware = new TopicMiddleware();
+            var session = new TestMQTTSession();
+            session.Topics.Add(new TopicFilter { Topic = "test/topic" });
+            
+            // Subscribe the session to a topic
+            ((ITopicManager)middleware).SubscribeTopic(session, "test/topic");
+            
+            // Verify it's subscribed
+            var sessionsBeforeUnregister = middleware.GetSubscribedSessions("test/topic");
+            Assert.Single(sessionsBeforeUnregister);
+
+            // Act
+            middleware.UnRegisterSession(session);
+
+            // Assert - Session should be removed from topic subscriptions
+            var sessionsAfterUnregister = middleware.GetSubscribedSessions("test/topic");
+            Assert.Empty(sessionsAfterUnregister);
+        }
+
+        [Fact]
+        public async Task UNSUBSCRIBE_Command_WithMultipleTopics_ShouldRemoveAll()
+        {
+            // Arrange
+            var session = new TestMQTTSession();
+            session.Topics.Add(new TopicFilter { Topic = "topic1" });
+            session.Topics.Add(new TopicFilter { Topic = "topic2" });
+            session.Topics.Add(new TopicFilter { Topic = "topic3" });
+            
+            var topicManagerMock = new Mock<ITopicManager>();
+            
+            var unsubscribeCommand = new UNSUBSCRIBE(topicManagerMock.Object);
+            var unsubscribePacket = new UnsubscribePacket
+            {
+                PacketIdentifier = 200,
+                TopicFilters = new List<string> { "topic1", "topic3" }
+            };
+
+            // Act
+            await unsubscribeCommand.ExecuteAsync(session, unsubscribePacket, CancellationToken.None);
+
+            // Assert
+            Assert.Single(session.Topics); // Only topic2 should remain
+            Assert.Equal("topic2", session.Topics[0].Topic);
+            
+            topicManagerMock.Verify(tm => tm.UnsubscribeTopic(It.IsAny<MQTTSession>(), "topic1"), Times.Once);
+            topicManagerMock.Verify(tm => tm.UnsubscribeTopic(It.IsAny<MQTTSession>(), "topic3"), Times.Once);
+            
+            // Verify UNSUBACK response
+            Assert.Single(session.SentData);
+            var response = session.SentData[0];
+            Assert.Equal(176, response[0]); // UNSUBACK packet type
+            Assert.Equal(2, response[1]); // Remaining length
+            Assert.Equal(0, response[2]); // Packet ID high byte
+            Assert.Equal(200, response[3]); // Packet ID low byte
+        }
+
+        [Fact]
+        public async Task QoS2Flow_CompleteSequence()
+        {
+            // Test the complete QoS 2 flow: PUBREC -> PUBREL -> PUBCOMP
+            var session = new TestMQTTSession();
+            ushort packetId = 12345;
+
+            // Step 1: Client sends PUBREC, server responds with PUBREL
+            var pubrecCommand = new PUBREC();
+            var pubrecPacket = new PubRecPacket { PacketIdentifier = packetId };
+            await pubrecCommand.ExecuteAsync(session, pubrecPacket, CancellationToken.None);
+
+            Assert.Single(session.SentData);
+            var pubrelResponse = session.SentData[0];
+            Assert.Equal(0x62, pubrelResponse[0]); // PUBREL
+            Assert.Equal((packetId >> 8) & 0xFF, pubrelResponse[2]); // Packet ID preserved
+            Assert.Equal(packetId & 0xFF, pubrelResponse[3]);
+
+            session.SentData.Clear();
+
+            // Step 2: Client sends PUBREL, server responds with PUBCOMP
+            var pubrelCommand = new PUBREL();
+            var pubrelPacket = new PubRelPacket { PacketIdentifier = packetId };
+            await pubrelCommand.ExecuteAsync(session, pubrelPacket, CancellationToken.None);
+
+            Assert.Single(session.SentData);
+            var pubcompResponse = session.SentData[0];
+            Assert.Equal(0x70, pubcompResponse[0]); // PUBCOMP
+            Assert.Equal((packetId >> 8) & 0xFF, pubcompResponse[2]); // Packet ID preserved
+            Assert.Equal(packetId & 0xFF, pubcompResponse[3]);
         }
     }
 }

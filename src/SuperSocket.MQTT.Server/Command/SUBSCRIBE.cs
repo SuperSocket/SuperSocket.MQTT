@@ -34,13 +34,16 @@ namespace SuperSocket.MQTT.Server.Command
                 _topicManager.SubscribeTopic(mqttSession, topicFilter.Topic);
             }
 
-            var buffer = _memoryPool.Rent(5);
+            // SUBACK: 2 bytes for packet identifier + 1 byte per topic filter for return code
+            var topicCount = subpacket.TopicFilters.Count;
+            var responseLength = 2 + topicCount;
+            var buffer = _memoryPool.Rent(2 + responseLength);
 
-            WriteBuffer(buffer, subpacket);
+            WriteBuffer(buffer, subpacket, responseLength);
 
             try
             {
-                await session.SendAsync(buffer.AsMemory()[..5]);
+                await session.SendAsync(buffer.AsMemory()[..(2 + responseLength)]);
             }
             finally
             {
@@ -48,15 +51,20 @@ namespace SuperSocket.MQTT.Server.Command
             }
         }
         
-        private void WriteBuffer(byte[] buffer, SubscribePacket packet)
+        private void WriteBuffer(byte[] buffer, SubscribePacket packet, int remainingLength)
         {
-            buffer[0] = 144;
-            buffer[1] = 3;
+            buffer[0] = 144; // SUBACK packet type (0x90)
+            buffer[1] = (byte)remainingLength;
 
             BinaryPrimitives.WriteUInt16BigEndian(buffer.AsSpan().Slice(2), packet.PacketIdentifier);
 
-            // Use the first topic filter's QoS, or default to 0
-            buffer[4] = packet.TopicFilters.Count > 0 ? packet.TopicFilters[0].QoS : (byte)0;
+            // Write return code (granted QoS) for each topic filter
+            for (int i = 0; i < packet.TopicFilters.Count; i++)
+            {
+                // Return the granted QoS (same as requested for now)
+                // Valid values: 0x00 (QoS 0), 0x01 (QoS 1), 0x02 (QoS 2), 0x80 (Failure)
+                buffer[4 + i] = packet.TopicFilters[i].QoS;
+            }
         }
     }
 }
