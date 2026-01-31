@@ -15,7 +15,7 @@ namespace SuperSocket.MQTT.Client
     public class MQTTClient : IAsyncDisposable
     {
         private readonly IEasyClient<MQTTPacket> _client;
-        private ushort _packetIdentifier = 0;
+        private ushort _packetIdentifier = 0; // Will be incremented to 1 before first use (0 is invalid per MQTT spec)
 
         /// <summary>
         /// Creates a new MQTT client instance.
@@ -139,7 +139,7 @@ namespace SuperSocket.MQTT.Client
             var publishPacket = new PublishPacket
             {
                 Type = ControlPacketType.PUBLISH,
-                Flags = (byte)(((byte)ControlPacketType.PUBLISH << 4) | flags),
+                Flags = flags,
                 TopicName = topic,
                 PacketIdentifier = packetId,
                 Qos = qos,

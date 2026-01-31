@@ -170,9 +170,6 @@ namespace SuperSocket.MQTT.Tests
 
             // Act - disconnect should complete without exception
             await client.SendDisconnectAsync();
-
-            // Assert - if we get here without exception, the test passed
-            Assert.True(true);
         }
 
         [Fact]
