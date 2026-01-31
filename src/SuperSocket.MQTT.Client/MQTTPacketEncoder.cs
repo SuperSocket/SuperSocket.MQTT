@@ -6,9 +6,16 @@ namespace SuperSocket.MQTT.Client
 {
     /// <summary>
     /// Encodes MQTT packets to bytes for transmission.
+    /// This class is stateless and should be used as a singleton.
     /// </summary>
     public class MQTTPacketEncoder : IPackageEncoder<MQTTPacket>
     {
+        /// <summary>
+        /// Singleton instance of the encoder.
+        /// MQTTPacketEncoder is stateless, so a single instance can be safely reused.
+        /// </summary>
+        public static readonly MQTTPacketEncoder Default = new MQTTPacketEncoder();
+
         /// <summary>
         /// Encodes an MQTT packet into the specified buffer writer.
         /// </summary>
