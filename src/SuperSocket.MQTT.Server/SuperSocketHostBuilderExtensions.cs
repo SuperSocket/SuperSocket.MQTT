@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using SuperSocket.Command;
 using SuperSocket.Server;
@@ -29,12 +30,12 @@ namespace SuperSocket.MQTT.Server
         public static ISuperSocketHostBuilder<MQTTPacket> UseMQTT(this ISuperSocketHostBuilder<MQTTPacket> builder)
         {
             return builder
-                .UsePipelineFilterFactory<MQTTPipelineFilterFactory>()
+                .UsePipelineFilter<MQTTPipelineFilter>()
                 .UseSession<MQTTSession>()
                 .UseCommand<ControlPacketType, MQTTPacket>(options => 
                 {
-                    // Add all command classes from the Server assembly
-                    options.AddCommandAssembly(typeof(SuperSocketHostBuilderExtensions).Assembly);
+                    // Add all command classes from the current executing assembly
+                    options.AddCommandAssembly(Assembly.GetExecutingAssembly());
                 })
                 .UseMiddleware<TopicMiddleware>(sp => sp.GetRequiredService<TopicMiddleware>())
                 .ConfigureServices((ctx, services) =>

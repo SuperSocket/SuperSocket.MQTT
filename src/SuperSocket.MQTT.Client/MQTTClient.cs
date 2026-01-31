@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
@@ -15,6 +16,7 @@ namespace SuperSocket.MQTT.Client
     public class MQTTClient : IAsyncDisposable
     {
         private readonly IEasyClient<MQTTPacket> _client;
+        private readonly MQTTPacketEncoder _encoder = new MQTTPacketEncoder();
         private ushort _packetIdentifier = 0; // Will be incremented to 1 before first use (0 is invalid per MQTT spec)
 
         /// <summary>
@@ -55,8 +57,7 @@ namespace SuperSocket.MQTT.Client
                 KeepAlive = keepAlive
             };
 
-            var data = MQTTPacketEncoder.Encode(connectPacket);
-            await _client.SendAsync(data);
+            await SendPacketAsync(connectPacket);
 
             var response = await _client.ReceiveAsync();
             return response as ConnAckPacket;
@@ -74,8 +75,7 @@ namespace SuperSocket.MQTT.Client
                 Type = ControlPacketType.PINGREQ
             };
 
-            var data = MQTTPacketEncoder.Encode(pingPacket);
-            await _client.SendAsync(data);
+            await SendPacketAsync(pingPacket);
 
             var response = await _client.ReceiveAsync();
             return response as PingRespPacket;
@@ -98,8 +98,7 @@ namespace SuperSocket.MQTT.Client
                 TopicFilters = new List<TopicFilter>(topicFilters)
             };
 
-            var data = MQTTPacketEncoder.Encode(subscribePacket);
-            await _client.SendAsync(data);
+            await SendPacketAsync(subscribePacket);
 
             var response = await _client.ReceiveAsync();
             return response as SubAckPacket;
@@ -147,8 +146,7 @@ namespace SuperSocket.MQTT.Client
                 Payload = new ReadOnlyMemory<byte>(payload)
             };
 
-            var data = MQTTPacketEncoder.Encode(publishPacket);
-            await _client.SendAsync(data);
+            await SendPacketAsync(publishPacket);
 
             if (qos > 0)
             {
@@ -170,8 +168,7 @@ namespace SuperSocket.MQTT.Client
                 Type = ControlPacketType.DISCONNECT
             };
 
-            var data = MQTTPacketEncoder.Encode(disconnectPacket);
-            await _client.SendAsync(data);
+            await SendPacketAsync(disconnectPacket);
         }
 
         /// <summary>
@@ -199,6 +196,13 @@ namespace SuperSocket.MQTT.Client
         public async ValueTask DisposeAsync()
         {
             await CloseAsync();
+        }
+
+        private async ValueTask SendPacketAsync(MQTTPacket packet)
+        {
+            var writer = new ArrayBufferWriter<byte>();
+            _encoder.Encode(writer, packet);
+            await _client.SendAsync(writer.WrittenMemory);
         }
 
         private ushort GetNextPacketIdentifier()
