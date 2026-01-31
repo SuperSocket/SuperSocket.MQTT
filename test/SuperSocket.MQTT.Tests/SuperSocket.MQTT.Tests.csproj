@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SuperSocket.MQTT\SuperSocket.MQTT.csproj" />
     <ProjectReference Include="..\..\src\SuperSocket.MQTT.Server\SuperSocket.MQTT.Server.csproj" />
+    <ProjectReference Include="..\..\src\SuperSocket.MQTT.Client\SuperSocket.MQTT.Client.csproj" />
   </ItemGroup>
 
 </Project>

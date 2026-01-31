@@ -6,7 +6,19 @@ namespace SuperSocket.MQTT
 {
     public class MQTTPipelineFilter : IPipelineFilter<MQTTPacket>
     {
-        public IPackageDecoder<MQTTPacket> Decoder { get; set; }
+        /// <summary>
+        /// Singleton MQTTPacketDecoder instance shared across all MQTTPipelineFilter instances.
+        /// MQTTPacketDecoder is stateless, so a single instance can be safely reused.
+        /// </summary>
+        private static readonly MQTTPacketDecoder _sharedDecoder = new MQTTPacketDecoder();
+
+        private IPackageDecoder<MQTTPacket> _decoder;
+
+        public IPackageDecoder<MQTTPacket> Decoder 
+        { 
+            get => _decoder ?? _sharedDecoder;
+            set => _decoder = value;
+        }
 
         public IPipelineFilter<MQTTPacket> NextFilter { get; private set; }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using SuperSocket.Command;
 using SuperSocket.Server;
@@ -33,8 +34,8 @@ namespace SuperSocket.MQTT.Server
                 .UseSession<MQTTSession>()
                 .UseCommand<ControlPacketType, MQTTPacket>(options => 
                 {
-                    // Add all command classes from the current assembly
-                    options.AddCommandAssembly(typeof(MQTTPacket).Assembly);
+                    // Add all command classes from the current executing assembly
+                    options.AddCommandAssembly(Assembly.GetExecutingAssembly());
                 })
                 .UseMiddleware<TopicMiddleware>(sp => sp.GetRequiredService<TopicMiddleware>())
                 .ConfigureServices((ctx, services) =>
