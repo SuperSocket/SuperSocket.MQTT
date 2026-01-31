@@ -8,6 +8,10 @@ using SuperSocket.Server.Abstractions.Session;
 
 namespace SuperSocket.MQTT.Server.Command
 {
+    /// <summary>
+    /// Handles PUBREL (Publish Release) control packets for QoS 2 publish flow.
+    /// When server receives PUBREL, it responds with PUBCOMP (Publish Complete).
+    /// </summary>
     [Command(Key = ControlPacketType.PUBREL)]
     public class PUBREL : IAsyncCommand<MQTTPacket>
     {
@@ -17,10 +21,10 @@ namespace SuperSocket.MQTT.Server.Command
         {
             var pubRelPacket = package as PubRelPacket;
             
-            // Create a response with the same packet identifier
+            // Respond with PUBCOMP (Publish Complete) - fixed header byte: 0x70
             var buffer = _memoryPool.Rent(4);
             
-            buffer[0] = 0x60; // PUBREL packet type
+            buffer[0] = 0x70; // PUBCOMP packet type
             buffer[1] = 2;    // Remaining length
             buffer[2] = (byte)(pubRelPacket.PacketIdentifier >> 8);
             buffer[3] = (byte)(pubRelPacket.PacketIdentifier & 0xFF);
